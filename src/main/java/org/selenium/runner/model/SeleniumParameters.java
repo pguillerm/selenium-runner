@@ -46,7 +46,7 @@ public class SeleniumParameters {
     public final static String PROPERTIE_BROWSER_START_COMMAND = "browser.start.command";
 
     /** The Constant PROPERTIE_BROWSER_URL. */
-    public final static String PROPERTIE_BROWSER_URL           = "browser.url";
+    public final static String PROPERTIE_BASE_URL              = "base.url";
 
     /** The test path, defaut : target/seleniumTestCase. */
     private String             testPath                        = "target/seleniumTestCase";
@@ -61,12 +61,16 @@ public class SeleniumParameters {
     private String             browserCommand                  = "*firefox";
 
     /** The browser url, default : localhost:8080. */
-    private String             browserUrl                      = "localhost:8080";
+    private String             baseUrl                         = "localhost:8080";
 
     private WebDriver          webdriver                       = new FirefoxDriver();
 
     /** The is windows. */
     private boolean            windows                         = false;
+
+    private boolean            dryRun                          = false;
+
+    private String             driverMapping                   = "c";
 
     // =========================================================================
     // CONSTRUCTORS
@@ -93,7 +97,7 @@ public class SeleniumParameters {
         this.host = host;
         this.port = port;
         this.browserCommand = browserCommand;
-        this.browserUrl = browserUrl;
+        this.baseUrl = browserUrl;
     }
 
     /**
@@ -120,8 +124,8 @@ public class SeleniumParameters {
                 browserCommand = bundle.getString(PROPERTIE_BROWSER_START_COMMAND);
             }
 
-            if (bundle.containsKey(PROPERTIE_BROWSER_URL)) {
-                browserUrl = bundle.getString(PROPERTIE_BROWSER_URL);
+            if (bundle.containsKey(PROPERTIE_BASE_URL)) {
+                baseUrl = bundle.getString(PROPERTIE_BASE_URL);
             }
         }
     }
@@ -162,10 +166,10 @@ public class SeleniumParameters {
         }
 
         result.append(", browserUrl=");
-        if (browserUrl == null) {
+        if (baseUrl == null) {
             result.append(strNull);
         } else {
-            result.append(browserUrl);
+            result.append(baseUrl);
         }
 
         result.append("]");
@@ -254,17 +258,17 @@ public class SeleniumParameters {
      * 
      * @return the browser url
      */
-    public String getBrowserUrl() {
-        return browserUrl;
+    public String getBaseUrl() {
+        return baseUrl;
     }
 
     /**
      * Sets the browser url.
      * 
-     * @param browserUrl the new browser url
+     * @param baseUrl the new browser url
      */
-    public void setBrowserUrl(String browserUrl) {
-        this.browserUrl = browserUrl;
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
     }
 
     /**
@@ -293,9 +297,20 @@ public class SeleniumParameters {
         this.webdriver = webdriver;
     }
 
-    public String getBaseUrl() {
-        // TODO generate base URL
-        return null;
+    public boolean isDryRun() {
+        return dryRun;
+    }
+
+    public void setDryRun(boolean dryRun) {
+        this.dryRun = dryRun;
+    }
+
+    public String getDriverMapping() {
+        return driverMapping;
+    }
+
+    public void setDriverMapping(String driverMapping) {
+        this.driverMapping = driverMapping;
     }
 
 }

@@ -27,6 +27,7 @@
         <jsap.version>2.1</jsap.version>
         <slf4j.version>1.6.1</slf4j.version>
         <logback.version>1.1.2</logback.version>
+        <junit.version>4.12</junit.version>
     </properties>
   
   <!--
@@ -77,6 +78,66 @@
             <version>${logback.version}</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
+    
+    
+    <!--
+    ============================================================================
+    = BUILD
+    ============================================================================
+    -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.2</version>
+
+                    <configuration>
+                        <verbose>true</verbose>
+                        <fork>true</fork>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                        <compilerVersion>1.8</compilerVersion>
+                        <executable>${java.javac.bin.path}</executable>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-java-8-env-property</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <rules>
+                                <requireProperty>
+                                    <property>env.FORGE_JDK_8_HOME</property>
+                                    <message>Your FORGE_JDK_8_HOME environment property isn't set. Please check your
+                                        system configuration</message>
+                                </requireProperty>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

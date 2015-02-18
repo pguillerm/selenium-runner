@@ -55,6 +55,12 @@ public class SeleniumService {
         LOGGER.info("start run process for {}", file);
         checkInput(file, parameters);
 
+        if (parameters.isDryRun()) {
+            LOGGER.info("====================================================");
+            LOGGER.info("Running in Dry run mode ");
+            LOGGER.info("====================================================");
+        }
+
         List<Instruction> instructions = null;
 
         final ParserDAOFile daoFile = ParserDAOFile.getInstance();
@@ -69,22 +75,27 @@ public class SeleniumService {
                 parameters.getBaseUrl());
 
         LOGGER.info("selenium launch...");
-        selenium.start();
+        if (!parameters.isDryRun()) {
+            selenium.start();
+        }
         LOGGER.info("selenium started");
 
-        final SeleniumRunner selRun = new SeleniumRunner(selenium, parameters);
+        final SeleniumRunner selRunner = new SeleniumRunner(selenium, parameters);
 
         for (Instruction currentInstruction : instructions) {
             try {
-                selRun.run(currentInstruction);
+                selRunner.run(currentInstruction);
             } catch (SeleniumRunnerException e) {
-                selenium.stop();
-                throw new SeleniumRunnerException(String.format("selRun.run(%s, selenium,%s) failed",
-                        currentInstruction.toString(), parameters.toString()), e);
+                if (!parameters.isDryRun()) {
+                    selenium.stop();
+                }
+                throw new SeleniumRunnerException(e.getMessage(), e);
             }
         }
         LOGGER.info("stop selenium instance...");
-        selenium.stop();
+        if (!parameters.isDryRun()) {
+            selenium.stop();
+        }
         LOGGER.info("Selenium stoped");
         LOGGER.info("Test SUCCESSFUL : {}", file.getName());
     }
@@ -101,7 +112,7 @@ public class SeleniumService {
             throw new SeleniumRunnerException("Parameters browser command musn't be null");
         }
 
-        if (parameters.getBrowserUrl() == null) {
+        if (parameters.getBaseUrl() == null) {
             throw new SeleniumRunnerException("Parameters browser url musn't be null");
         }
         if (parameters.getHost() == null) {

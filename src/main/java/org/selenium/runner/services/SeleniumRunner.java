@@ -17,14 +17,18 @@
  */
 package org.selenium.runner.services;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.Map;
+
+import net.sf.cglib.reflect.FastClass;
+import net.sf.cglib.reflect.FastMethod;
 
 import org.apache.commons.lang3.text.StrBuilder;
 import org.selenium.runner.exceptions.SeleniumRunnerException;
 import org.selenium.runner.model.Instruction;
+import org.selenium.runner.model.SeleniumActionType;
 import org.selenium.runner.model.SeleniumParameters;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,21 +48,48 @@ public class SeleniumRunner {
     // =========================================================================
     // ATTRIBUTES
     // =========================================================================
-    private static final Logger           LOGGER       = LoggerFactory.getLogger(SeleniumRunner.class);
+    private static final Logger                 LOGGER            = LoggerFactory.getLogger(SeleniumRunner.class);
 
-    private final WebDriverBackedSelenium selenium;
+    private final SeleniumParameters            parameters;
 
-    private final SeleniumParameters      parameters;
+    private final Map<String, String>           storedValues      = new HashMap<String, String>();
 
-    private final Map<String, String>     storedValues = new HashMap<String, String>();
+    private SeleniumWrapper                     seleniumWrapper;
+
+    private FastClass                           seleniumFastClass = null;
+
+    private Map<SeleniumActionType, FastMethod> CACH_FAST_METHOD  = new HashMap<SeleniumActionType, FastMethod>();
 
     // =========================================================================
     // CONSTRUCTORS
     // =========================================================================
     public SeleniumRunner(final WebDriverBackedSelenium selenium, final SeleniumParameters parameters) {
         super();
-        this.selenium = selenium;
         this.parameters = parameters;
+        seleniumFastClass = FastClass.create(WebDriverBackedSelenium.class);
+        initilizeFastMethod();
+        seleniumWrapper = new SeleniumWrapper(selenium, parameters);
+
+    }
+
+    private void initilizeFastMethod() {
+
+        final Method[] methods = WebDriverBackedSelenium.class.getMethods();
+        for (SeleniumActionType actionType : SeleniumActionType.values()) {
+
+            FastMethod fast = seleniumFastClass.getMethod(findMethod(methods, actionType.name()));
+        }
+    }
+
+    private Method findMethod(final Method[] methods, final String name) {
+        Method result = null;
+        for (Method method : methods) {
+            if (method.getName().equals(name)) {
+                result = method;
+                break;
+            }
+        }
+        return result;
     }
 
     // =========================================================================
@@ -69,8 +100,8 @@ public class SeleniumRunner {
         if (instruction == null) {
             throw new SeleniumRunnerException("instruction is null");
         }
-        if (selenium == null) {
-            throw new SeleniumRunnerException("selenium is null");
+        if (seleniumWrapper == null) {
+            throw new SeleniumRunnerException("selenium must be initialized!");
         }
 
         LOGGER.info(instruction.toString());
@@ -84,7 +115,7 @@ public class SeleniumRunner {
             instruction.setTarget(injectValue(instruction.getTarget()));
         }
 
-        runMethod(instruction, selenium, parameters);
+        runMethod(instruction);
     }
 
     // =========================================================================
@@ -119,10 +150,11 @@ public class SeleniumRunner {
      * @param seleniumWrapper the selenium wrapper
      * @throws ClientException the client exception
      */
-    protected void runMethod(final Instruction instruction, final Selenium selenium, final SeleniumParameters parameters)
-            throws SeleniumRunnerException {
+    protected void runMethod(final Instruction instruction) throws SeleniumRunnerException {
+        if (instruction != null) {
+            FastMethod method = CACH_FAST_METHOD.get(instruction.getType());
 
-        // TOOD Wrap Selnium interface with CGLIB.
+        }
 
     }
 

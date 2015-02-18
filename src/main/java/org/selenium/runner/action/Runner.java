@@ -158,7 +158,7 @@ public class Runner {
         parameters.setWindows(isWindows);
 
         if (urlBrowser != null) {
-            parameters.setBrowserUrl(urlBrowser);
+            parameters.setBaseUrl(urlBrowser);
         }
 
         if (browserOpts != null) {
